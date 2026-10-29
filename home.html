@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="logo-manzil.png" type="image/png" />
+<title>Al Manzil Hotel — Dining</title>
+<meta name="theme-color" content="#f2f2e3" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11.1.14/swiper-bundle.min.css">
+<style>
+  /* split-screen chooser: one half per outlet, then a strip of the hotel's own dish photos.
+     colours sampled from the two printed menus */
+  :root {
+    --cream: #f2f2e3; --card: #fafaf2; --ink: #5c4f2f; --muted: #837a5f; --bronze: #8a5d37; --bronze-2: #b4783f;
+    --olive: #7d653e; --olive-2: #8b7449; --olive-3: #5a4829; --wine: #7e2727; --tan: #d29655; --line: rgba(92,79,47,.14);
+    --display: "Cormorant Garamond", "Times New Roman", serif; --text: "Manrope", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--text); background: var(--cream); color: var(--ink); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+
+  .top { display: flex; justify-content: center; padding: 14px 16px; background: var(--cream); border-bottom: 1px solid var(--line); }
+  .top img { height: 64px; width: auto; }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; min-height: min(78vh, 720px); }
+  .half { position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 40px clamp(20px, 4vw, 48px); text-decoration: none; color: #fff; isolation: isolate; }
+  .half .bg, .half video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transition: transform .8s ease; }
+  .half::after { content: ""; position: absolute; inset: 0; z-index: -1; }
+  .half:hover .bg, .half:hover video { transform: scale(1.04); }
+  .ird .bg { background: url("media/ird-breakfast.jpg") center / cover; }
+  .ird::after { background: linear-gradient(180deg, rgba(30,20,8,.05) 30%, rgba(30,20,8,.78)); }
+  .elixir { background: radial-gradient(120% 90% at 70% 10%, var(--olive-2) 0%, var(--olive) 45%, var(--olive-3) 100%); }
+  .elixir::after { background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,.45)); }
+  .half .inner { max-width: 440px; display: grid; gap: 12px; }
+  .half .kicker { font-size: .74rem; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; opacity: .9; }
+  .half h2 { margin: 0; font-family: var(--display); font-weight: 600; font-size: clamp(2.6rem, 6vw, 4.2rem); line-height: .95; text-wrap: balance; }
+  .elixir .wordmark { width: min(320px, 70vw); height: auto; }
+  .half p { margin: 0; line-height: 1.6; color: rgba(255,255,255,.9); max-width: 40ch; }
+  .half .hours { font-size: .8rem; font-weight: 700; letter-spacing: .04em; color: rgba(255,255,255,.82); }
+  .half .go { justify-self: start; margin-top: 6px; padding: 13px 24px; border-radius: 999px; font-weight: 800; font-size: .92rem; }
+  .ird .go { background: var(--cream); color: var(--bronze); }
+  .elixir .go { background: var(--wine); color: #fff; }
+  .half .go:focus-visible, .half:focus-visible { outline: 3px solid var(--tan); outline-offset: 4px; }
+
+  .band { max-width: 1120px; margin: 0 auto; padding-inline: 16px; padding-block: 44px 20px; display: grid; gap: 18px; }
+  .band h3 { margin: 0; font-family: var(--display); font-weight: 600; font-size: clamp(1.8rem, 4vw, 2.4rem); text-align: center; text-wrap: balance; }
+  .band > p { margin: 0 auto; max-width: 58ch; text-align: center; color: var(--muted); line-height: 1.6; }
+  /* dish slider (Swiper); without the script it falls back to a swipeable row */
+  .taste { position: relative; min-width: 0; max-width: 100%; } /* grid child: without min-width 0 Swiper grows without limit */
+  .taste .swiper { width: 100%; }
+  .taste .swiper { padding-bottom: 34px; }
+  .taste .swiper:not(.swiper-initialized) .swiper-wrapper { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(200px, 1fr); gap: 14px; overflow-x: auto; }
+  .strip figure { margin: 0; }
+  .strip img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 14px; display: block; }
+  .strip figcaption { margin-top: 6px; font-size: .82rem; font-weight: 600; color: var(--muted); }
+  .taste .nav { position: absolute; top: calc(50% - 34px); z-index: 2; width: 44px; height: 44px; border-radius: 50%; border: 0; display: grid; place-items: center; cursor: pointer; background: var(--card); color: var(--bronze); box-shadow: 0 6px 18px -6px rgba(60,45,20,.45); font-size: 1.2rem; }
+  .taste .nav.prev { left: -8px; } .taste .nav.next { right: -8px; }
+  .taste .nav:hover { background: var(--bronze); color: #fff; }
+  .taste .nav.swiper-button-disabled { opacity: .35; cursor: default; }
+  .taste .swiper-pagination-bullet { background: var(--bronze); opacity: .3; }
+  .taste .swiper-pagination-bullet-active { opacity: 1; width: 22px; border-radius: 4px; }
+  @media (max-width: 760px) { .taste .nav { display: none; } }
+
+  .steps { max-width: 1120px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 44px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 1px solid var(--line); }
+  .steps div { padding: 22px 20px 0; }
+  .steps div + div { border-left: 1px solid var(--line); }
+  .steps b { display: block; font-family: var(--display); font-size: 1.35rem; margin-bottom: 4px; }
+  .steps span { color: var(--muted); font-size: .92rem; line-height: 1.55; }
+
+  footer { background: var(--card); border-top: 1px solid var(--line); padding: 24px 16px 30px; text-align: center; color: var(--muted); font-size: .84rem; line-height: 1.8; }
+  footer nav a { margin: 0 5px; }
+
+  @media (max-width: 760px) {
+    .split { grid-template-columns: 1fr; min-height: 0; }
+    .half { min-height: 62vh; }
+    .steps { grid-template-columns: 1fr; }
+    .steps div + div { border-left: 0; border-top: 1px solid var(--line); margin-top: 18px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .half .bg, .half video { transition: none; } }
+</style>
+</head>
+<body>
+
+<header class="top"><img src="logo-manzil.png" alt="Al Manzil Hotel Bahrain" /></header>
+
+<main>
+  <section class="split" aria-label="Choose where to order">
+    <a class="half ird" href="index.html?loc=ird">
+      <span class="bg" aria-hidden="true"></span>
+      <div class="inner">
+        <span class="kicker">Delivered to your room</span>
+        <h2>In-Room Dining</h2>
+        <p>Arabic, Indian and Western favourites, with allergens marked on every dish.</p>
+        <span class="hours">Breakfast 7–10:30 AM · All-day 12 PM–2 AM · 24-hour menu</span>
+        <span class="go">Open the menu →</span>
+      </div>
+    </a>
+    <a class="half elixir" href="index.html?loc=elixir">
+      <!-- the lounge's Instagram reel plays here once media/elixir-hero.mp4 is added -->
+      <video id="elixirVideo" muted loop playsinline autoplay preload="auto" hidden></video>
+      <div class="inner">
+        <span class="kicker">Lounge &amp; bar</span>
+        <img class="wordmark" src="logo-elixir.png" alt="Elixir Lounge" />
+        <p>Signature cocktails, classics, draught beer, spirits by the glass or bottle, wine and champagne.</p>
+        <span class="go">Open the drinks menu →</span>
+      </div>
+    </a>
+  </section>
+
+  <section class="band" aria-labelledby="tasteTitle">
+    <h3 id="tasteTitle">Where flavour meets moments</h3>
+    <p>A taste of the in-room menu, prepared in our kitchen and brought to your door.</p>
+    <div class="taste">
+      <button class="nav prev" type="button" aria-label="Previous dishes">‹</button>
+      <div class="swiper strip">
+        <div class="swiper-wrapper">
+          <figure class="swiper-slide"><img src="media/ird-breakfast.jpg" alt="American breakfast with eggs, sausages and French toast" loading="lazy" /><figcaption>Breakfast</figcaption></figure>
+          <figure class="swiper-slide"><img src="media/ird-tandoori.jpg" alt="Tandoori chicken" loading="lazy" /><figcaption>Tandoori Chicken</figcaption></figure>
+          <figure class="swiper-slide"><img src="media/ird-biryani.jpg" alt="Chicken biryani" loading="lazy" /><figcaption>Biryani</figcaption></figure>
+          <figure class="swiper-slide"><img src="media/ird-steak.jpg" alt="Grilled steak with sauce" loading="lazy" /><figcaption>Angus Steaks</figcaption></figure>
+          <figure class="swiper-slide"><img src="media/ird-pizza.jpg" alt="Pizza" loading="lazy" /><figcaption>Pizza</figcaption></figure>
+          <figure class="swiper-slide"><img src="media/ird-soup.jpg" alt="Soup with salad on a tray" loading="lazy" /><figcaption>Soups &amp; Salads</figcaption></figure>
+          <figure class="swiper-slide"><img src="media/ird-fried.jpg" alt="Crispy fried chicken" loading="lazy" /><figcaption>Appetizers</figcaption></figure>
+          <figure class="swiper-slide"><img src="media/ird-roast.jpg" alt="Roast chicken" loading="lazy" /><figcaption>Main Courses</figcaption></figure>
+          <figure class="swiper-slide"><img src="media/ird-cake.jpg" alt="Chocolate cake" loading="lazy" /><figcaption>Chocolate Cake</figcaption></figure>
+        </div>
+        <div class="swiper-pagination"></div>
+      </div>
+      <button class="nav next" type="button" aria-label="Next dishes">›</button>
+    </div>
+  </section>
+
+  <section class="steps" aria-label="How ordering works">
+    <div><b>Scan</b><span>Scan the code in your room or on your lounge table. The menu opens set to where you are.</span></div>
+    <div><b>Order</b><span>Add what you like and send it straight to the kitchen or the bar.</span></div>
+    <div><b>Enjoy</b><span>Follow it live from preparing to ready, and we bring it to you.</span></div>
+  </section>
+</main>
+
+<footer>
+  <div>© 2026 Al Manzil Hotel Bahrain · Prices in BHD, inclusive of 10% service charge, 5% government levy and 10% VAT.</div>
+  <nav>Staff: <a href="kds.html">Kitchen &amp; bar</a> · <a href="cashier.html">Cashier</a> · <a href="admin.html">Products</a> · <a href="qr-codes.html">QR codes</a></nav>
+</footer>
+
+<script>
+  // show the lounge video only if the file exists; otherwise the olive backdrop stays
+  (function () {
+    var v = document.getElementById("elixirVideo");
+    v.addEventListener("loadeddata", function () { v.hidden = false; v.play().catch(function () {}); });
+    v.src = "media/elixir-hero.mp4";
+  })();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11.1.14/swiper-bundle.min.js"></script>
+<script>
+  // dish slider: 1 card on phones up to 4 on desktop; autoplay off for reduced-motion users
+  if (window.Swiper) {
+    var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    new Swiper(".taste .swiper", {
+      slidesPerView: 1.25, spaceBetween: 14, loop: true, grabCursor: true, keyboard: { enabled: true },
+      autoplay: still ? false : { delay: 3500, pauseOnMouseEnter: true, disableOnInteraction: false },
+      navigation: { prevEl: ".taste .nav.prev", nextEl: ".taste .nav.next" },
+      pagination: { el: ".taste .swiper-pagination", clickable: true },
+      breakpoints: { 560: { slidesPerView: 2.2 }, 860: { slidesPerView: 3.2 }, 1100: { slidesPerView: 4, spaceBetween: 18 } },
+      a11y: { prevSlideMessage: "Previous dishes", nextSlideMessage: "Next dishes" },
+    });
+  }
+</script>
+</body>
+</html>

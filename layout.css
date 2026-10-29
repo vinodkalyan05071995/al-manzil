@@ -1,0 +1,125 @@
+/* ============================================================
+   AL MANZIL — customer menu layout (loaded after menu.css)
+   Hotel menu-book layout: full-bleed photo/video hero, text tabs,
+   photo section banners, printed-menu rows (name · leader · price),
+   and a bottom order bar. Colours come from the per-outlet theme
+   tokens in menu.css (body[data-theme]).
+   ============================================================ */
+
+:root {
+  --display: "Cormorant Garamond", "Times New Roman", serif;
+  --text: "Manrope", system-ui, -apple-system, sans-serif;
+  --hero-fallback: linear-gradient(160deg, #6f5a38, #3f3220);
+}
+body[data-theme="elixir"] {
+  /* olive card stock from the beverages menu until the Instagram video is added */
+  --hero-fallback: radial-gradient(120% 90% at 70% 10%, #8b7449 0%, #7d653e 45%, #5a4829 100%);
+}
+
+body { font-family: var(--text); padding-bottom: 96px; }
+
+/* ---------- hero ---------- */
+.hero {
+  position: relative; overflow: hidden; color: #fff;
+  min-height: min(68vh, 560px); display: flex; flex-direction: column; justify-content: space-between;
+  background: var(--hero-fallback); background-size: cover; background-position: center;
+}
+.hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hero-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(20,14,6,.45) 0%, rgba(20,14,6,.05) 35%, rgba(20,14,6,.72) 100%); }
+.hero:not(.has-media) .hero-shade { background: linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.22)); }
+.hero-top, .hero-body { position: relative; z-index: 1; }
+.hero-top { display: flex; align-items: center; justify-content: space-between; padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 0; }
+.hero-home { display: inline-flex; align-items: center; padding: 6px 10px; border-radius: 12px; background: rgba(255,255,255,.88); }
+.hero-home .appbar-logo { height: 34px; width: auto; display: block; }
+body[data-theme="elixir"] .hero-home { background: rgba(0,0,0,.18); }
+body[data-theme="elixir"] .hero-home .appbar-logo { height: 26px; }
+.hero .bag-btn { background: rgba(255,255,255,.9); color: #3b2f1c; border: 0; }
+
+.hero-body { padding: 0 20px 26px; max-width: 760px; width: 100%; margin: 0 auto; }
+.hero-logo { display: none; }
+body[data-theme="elixir"] .hero-logo { display: block; width: min(300px, 74vw); height: auto; margin-bottom: 6px; filter: drop-shadow(0 4px 18px rgba(0,0,0,.25)); }
+body[data-theme="elixir"] .hero-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } /* the wordmark already says it */
+.hero-name { font-family: var(--display); font-weight: 600; font-size: clamp(2.4rem, 9vw, 3.6rem); line-height: 1; margin: 0 0 10px; text-wrap: balance; }
+.hero-lede { margin: 0 0 16px; max-width: 46ch; font-size: .98rem; line-height: 1.55; color: rgba(255,255,255,.9); }
+.hero-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+.hero .loc-chip { background: rgba(255,255,255,.16); color: #fff; border: 1px solid rgba(255,255,255,.35); backdrop-filter: blur(6px); }
+.hero .loc-chip svg { color: #fff; }
+.hero .loc-chip.ghost { background: transparent; }
+
+/* ---------- intro strip ---------- */
+.intro { background: var(--card); border-bottom: 1px solid var(--line); }
+.intro .store-tags { justify-content: center; padding: 12px 16px; margin: 0 auto; max-width: 760px; gap: 8px 18px; }
+.intro .store-tags span { background: none; border: 0; padding: 0; font-size: .82rem; font-weight: 600; color: var(--muted); }
+
+/* ---------- category tabs: text with an underline, not pills ---------- */
+.catnav { top: env(safe-area-inset-top, 0px); background: var(--bar); border-bottom: 1px solid var(--line); box-shadow: none; } /* no app bar above it any more */
+.catnav-inner { gap: 22px; padding: 0 18px; max-width: 760px; margin: 0 auto; }
+.cattab, .cattab.active {
+  background: none; border: 0; border-radius: 0; box-shadow: none; padding: 14px 0 12px; margin: 0;
+  font-family: var(--text); font-size: .86rem; font-weight: 700; letter-spacing: .02em; color: var(--muted);
+  border-bottom: 2px solid transparent; white-space: nowrap;
+}
+.cattab.active { color: var(--ink); border-bottom-color: var(--brand); }
+.cattab:hover { color: var(--ink); background: none; }
+
+/* ---------- sections ---------- */
+#menuRoot.wrap { max-width: 760px; }
+.section { margin-top: 30px; scroll-margin-top: 64px; }
+.sec-banner {
+  position: relative; height: 168px; border-radius: 18px; overflow: hidden;
+  background-size: cover; background-position: center; display: flex; align-items: flex-end;
+}
+.sec-banner::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 30%, rgba(0,0,0,.66)); }
+.sec-banner > div { position: relative; padding: 16px 18px; color: #fff; }
+.sec-banner h2, .sec-title h2 { font-family: var(--display); font-weight: 600; font-size: 2.05rem; line-height: 1; margin: 0; }
+.sec-banner .note { display: block; margin-top: 4px; font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.85); }
+.sec-title { padding: 6px 0 4px; border-bottom: 1px solid var(--line); }
+.sec-title h2 { color: var(--ink); }
+.sec-title .note { display: block; margin: 4px 0 10px; font-size: .76rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--brand); }
+body[data-theme="elixir"] .sec-title h2 { color: var(--gold); }
+body[data-theme="elixir"] .sec-title .note { color: var(--muted); }
+
+/* ---------- printed-menu rows ---------- */
+.dish-list { list-style: none; margin: 4px 0 0; padding: 0; }
+.dish { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 16px 2px; border-bottom: 1px dashed var(--line); }
+.dish:has(.dish-img) { grid-template-columns: 64px minmax(0, 1fr) auto; }
+.dish-img { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; }
+.dish-main { min-width: 0; }
+.dish-line { display: flex; align-items: baseline; gap: 8px; }
+.dish-line h3 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 1.28rem; line-height: 1.15; color: var(--ink); min-width: 0; }
+.dish-line .leader { flex: 1; min-width: 18px; border-bottom: 2px dotted var(--faint); transform: translateY(-4px); opacity: .7; }
+.dish-line .price { font-weight: 800; font-size: .92rem; color: var(--brand); white-space: nowrap; font-variant-numeric: tabular-nums; }
+body[data-theme="elixir"] .dish-line .price { color: var(--gold); }
+.dish-badge { display: inline-block; margin-top: 4px; font-size: .66rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+.dish .card-desc { margin: 4px 0 0; font-size: .85rem; line-height: 1.5; color: var(--muted); -webkit-line-clamp: unset; display: block; overflow: visible; }
+.dish .tags { margin-top: 8px; }
+
+/* round add button; the stepper keeps menu.css styling */
+.add-btn.round { width: 40px; height: 40px; padding: 0; border-radius: 50%; display: grid; place-items: center; border: 1.5px solid var(--brand); background: transparent; color: var(--brand); }
+.add-btn.round::before { content: none; }
+.add-btn.round svg { width: 18px; height: 18px; margin: 0; }
+.add-btn.round:hover { background: var(--brand); color: #fff; }
+body[data-theme="elixir"] .add-btn.round { border-color: var(--gold); color: var(--gold); }
+body[data-theme="elixir"] .add-btn.round:hover { background: var(--gold); color: #2a2317; }
+
+/* ---------- legend + footer ---------- */
+.legend { max-width: 760px; }
+.legend h3, .foot-brand { font-family: var(--display); }
+.legend h3 { font-size: 1.5rem; }
+.foot-brand { font-size: 1.25rem; }
+
+/* ---------- bottom order bar ---------- */
+.orderbar {
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 60;
+  width: min(560px, calc(100% - 32px)); display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px; border: 0; border-radius: 16px; cursor: pointer;
+  background: var(--brand); color: #fff; font-family: var(--text); font-size: .95rem; font-weight: 700;
+  box-shadow: 0 14px 34px -10px rgba(0,0,0,.45);
+}
+.orderbar .ob-count { min-width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; background: rgba(255,255,255,.2); font-size: .85rem; }
+.orderbar .ob-label { flex: 1; text-align: left; }
+.orderbar .ob-total { font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: no-preference) {
+  .orderbar:not([hidden]) { animation: obIn .28s ease-out; }
+  @keyframes obIn { from { transform: translate(-50%, 18px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+}

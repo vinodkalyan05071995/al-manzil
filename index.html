@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<link rel="icon" href="logo.png" type="image/png" />
+<title>Al Manzil — Order Menu</title>
+<meta name="theme-color" content="#f2f1e3" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="menu.css" />
+<link rel="stylesheet" href="layout.css" />
+</head>
+<body>
+
+<!-- ===== HERO: outlet photo or Instagram video, logo, room/table ===== -->
+<header class="hero" id="hero">
+  <video class="hero-video" id="heroVideo" muted loop playsinline autoplay preload="auto" hidden></video>
+  <div class="hero-shade"></div>
+  <div class="hero-top">
+    <a class="hero-home" href="home.html" aria-label="Al Manzil Hotel home">
+      <img class="appbar-logo" id="appbarLogo" src="logo.png" alt="Al Manzil Hotel" />
+    </a>
+    <button class="bag-btn" id="cartBtn" aria-label="Your order">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg>
+      <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </div>
+  <div class="hero-body">
+    <img class="hero-logo" id="storeLogo" src="logo.png" alt="Al Manzil Hotel" />
+    <h1 class="hero-name" id="storeName">In-Room Dining</h1>
+    <p class="hero-lede" id="heroLede">Order from your phone — we prepare it fresh and bring it to you.</p>
+    <div class="hero-meta">
+      <span id="tableChip" class="loc-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16M6 9v11M18 9v11M3 9l9-5 9 5"/></svg>
+        <span id="tableChipText">Table —</span>
+      </span>
+      <span class="loc-chip ghost"><span id="storePlace">Al Manzil Hotel</span></span>
+    </div>
+  </div>
+</header>
+
+<!-- ===== INTRO STRIP + CATEGORY NAV ===== -->
+<div class="intro"><div class="store-tags" id="storeTags"></div></div>
+<nav class="catnav" id="catnavBar">
+  <div class="catnav-inner" id="catnav"></div>
+</nav>
+
+<!-- ===== MENU ===== -->
+<main class="wrap" id="menuRoot"></main>
+
+<!-- ===== ALLERGEN LEGEND (filled by app.js when the menu uses tags) ===== -->
+<section class="wrap legend" id="allergenLegend" hidden></section>
+
+<footer class="foot">
+  <div class="foot-social">
+    <a href="home.html" class="fs-link"><span class="fs-ic">✦</span><span>Al Manzil</span></a>
+    <a href="#" class="fs-link" id="igLink" target="_blank" rel="noopener" hidden><span class="fs-ic">◎</span><span>Instagram</span></a>
+    <a href="#" class="fs-link" id="switchLink"><span class="fs-ic">⇄</span><span id="switchText">Elixir Lounge</span></a>
+  </div>
+  <p class="foot-brand"><a href="home.html">Al Manzil Hotel Bahrain</a> — where every meal becomes a memory.</p>
+  <p class="foot-note">All prices are in Bahraini dinars and include 10% service charge, 5% government levy and 10% VAT.</p>
+  <p class="foot-staff">Staff · <a href="kds.html" id="staffKds">Kitchen</a> · <a href="cashier.html" id="staffCashier">Cashier</a> · <a href="qr-codes.html">QR codes</a></p>
+  <p class="foot-copy">© 2026 Al Manzil Hotel Bahrain</p>
+</footer>
+
+<!-- ===== ORDER BAR (appears once something is in the order) ===== -->
+<button class="orderbar" id="orderBar" type="button" hidden>
+  <span class="ob-count" id="obCount">1</span>
+  <span class="ob-label">View order</span>
+  <span class="ob-total" id="obTotal">din 0.000</span>
+</button>
+
+<!-- ===== CART DRAWER ===== -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Your order">
+  <div class="drawer-head">
+    <div>
+      <h2>Your Order</h2>
+      <div class="drawer-context" id="drawerContext">Table —</div>
+    </div>
+    <button class="x" id="drawerClose" aria-label="Close">&times;</button>
+  </div>
+
+  <div class="cart-items" id="cartItems"></div>
+
+  <div class="drawer-foot" id="drawerFoot" hidden>
+    <div class="ordertype" id="orderType">
+      <button data-type="table" class="active"><span id="otLabel">Bring to my table</span><small id="otTable">Table —</small></button>
+      <button data-type="counter">Pick up at counter<small>Skip the wait</small></button>
+    </div>
+    <div class="namefield">
+      <input id="custName" type="text" maxlength="40" autocomplete="name"
+             placeholder="Name (optional)" />
+      <input id="custPhone" type="tel" maxlength="20" autocomplete="tel" inputmode="numeric"
+             placeholder="Phone — earn points (optional)" />
+      <span class="namehint" id="nameHint">Add your phone to earn 1 point per 1 din spent. Optional — skip anytime.</span>
+    </div>
+    <div class="paytype" id="payType">
+      <button data-pay="later" class="active"><span id="ptLaterLabel">Pay at counter</span><small id="ptLater">Cash or card</small></button>
+      <button data-pay="online">Pay now<small>Card · skip the queue</small></button>
+    </div>
+    <div class="totals">
+      <div class="row"><span>Subtotal</span><span id="tSub">din 0.000</span></div>
+      <div class="row"><span id="taxLabel">Tax</span><span id="tTax">din 0.000</span></div>
+      <div class="row grand"><span>Total</span><span id="tGrand">din 0.000</span></div>
+    </div>
+    <button class="place-btn" id="placeBtn">Place Order</button>
+  </div>
+</aside>
+
+<!-- ===== CONFIRMATION ===== -->
+<div class="confirm-scrim" id="confirmScrim">
+  <div class="confirm">
+    <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></div>
+    <h2>Order placed!</h2>
+    <div class="ordernum" id="confirmNum">#000</div>
+    <p id="confirmMsg">We're firing up your order.</p>
+    <div class="eta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="confirmEta">Ready in ~8 min</span></div>
+    <div class="tracker" id="tracker">
+      <div class="step" data-step="new"><span></span>Received</div>
+      <div class="step" data-step="preparing"><span></span>Preparing</div>
+      <div class="step ready" data-step="ready"><span></span>Ready</div>
+    </div>
+    <div class="paidline" id="paidLine"></div>
+    <div class="loyaltyline" id="loyaltyLine" hidden></div>
+    <button class="btn btn-primary" id="confirmDone">Done</button>
+  </div>
+</div>
+
+<!-- ===== PAY NOW (mock card) ===== -->
+<div class="confirm-scrim" id="payScrim">
+  <div class="confirm pay">
+    <div class="pay-head">
+      <span class="pay-badge">Demo checkout</span>
+      <h2>Pay din <span id="payAmount">0.000</span></h2>
+      <p>No real card is charged — this is a local demo.</p>
+    </div>
+    <form id="payForm" autocomplete="off">
+      <label>Card number
+        <input id="ccNum" inputmode="numeric" placeholder="4242 4242 4242 4242" required />
+      </label>
+      <div class="pay-row">
+        <label>Expiry
+          <input id="ccExp" placeholder="MM/YY" required />
+        </label>
+        <label>CVC
+          <input id="ccCvc" inputmode="numeric" placeholder="123" required />
+        </label>
+      </div>
+      <button class="place-btn" type="submit" id="payNowBtn">Pay din <span id="payAmount2">0.000</span></button>
+      <button class="btn btn-ghost" type="button" id="payCancel" style="width:100%;margin-top:10px">Cancel</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 13l4 4L19 7"/></svg><span id="toastText">Added</span></div>
+
+<script src="data.js"></script>
+<script src="locations.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
