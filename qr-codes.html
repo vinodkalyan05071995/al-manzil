@@ -41,6 +41,12 @@
   .qr-box img, .qr-box canvas { width: 100% !important; height: 100% !important; }
   .qr-card .scan { font-size: 0.82rem; color: var(--coffee-soft); font-weight: 600; }
   .qr-card .brandline { font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--caramel); font-weight: 800; margin-top: 4px; }
+  /* "Both outlets": one card per room with a code for each outlet */
+  .qr-grid.duo { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+  .duo-codes { display: flex; justify-content: center; gap: 16px; }
+  .duo-codes > div { display: grid; justify-items: center; }
+  .duo-codes .qr-box { width: 140px; height: 140px; margin: 12px auto 6px; }
+  .duo-codes .olabel { font-size: .74rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--pine); }
 
   .page-head { padding: 40px 0 6px; }
   .page-head h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); }
@@ -51,6 +57,8 @@
     body { background: #fff; color: #111; }
     body::after { display: none; }
     .qr-grid { grid-template-columns: repeat(3, 1fr); }
+    .qr-grid.duo { grid-template-columns: repeat(2, 1fr); }
+    .duo-codes .olabel { color: #111 !important; }
     .qr-card { background: #fff; border: 1px solid #ccc; color: #111; }
     .qr-card .tname, .qr-card .tnum, .qr-card .brandline { color: #111 !important; }
     .qr-card .scan { color: #555 !important; }
@@ -105,6 +113,12 @@
   // ---- populate the location picker from the registry ----
   const LOCS = window.LOC_API.listLocations();
   locSelect.innerHTML = LOCS.map((l) => `<option value="${l.id}">${l.name}</option>`).join("");
+  // every outlet delivers to rooms: offer one card per room carrying all outlets' codes
+  const ALL = "__all";
+  if (LOCS.length > 1 && LOCS.every((l) => (l.seat || "Table") === "Room")) {
+    locSelect.insertAdjacentHTML("afterbegin", `<option value="${ALL}">Both outlets — one card per room</option>`);
+    locSelect.value = ALL;
+  }
   const wanted = new URLSearchParams(location.search).get("loc");
   if (wanted && LOCS.some((l) => l.id === wanted)) locSelect.value = wanted;
   // single-store setup: hide the picker, keep the layout tidy
@@ -143,7 +157,7 @@
   }
   // rooms default to a sample floor, tables to 1–12, until staff type their own
   function setDefaults() {
-    const store = LOCS.find((l) => l.id === locSelect.value) || LOCS[0];
+    const store = locSelect.value === ALL ? LOCS[0] : LOCS.find((l) => l.id === locSelect.value) || LOCS[0];
     const isRoom = (store.seat || "Table") === "Room";
     document.getElementById("countLabel").textContent = isRoom ? "Room numbers" : "Tables";
     countInput.placeholder = isRoom ? "e.g. 101-120, 201-220" : "e.g. 12 or 1-20";
@@ -153,10 +167,33 @@
   function render() {
     const base = baseInput.value.trim() || defaultBase();
     const locId = locSelect.value || (LOCS[0] && LOCS[0].id);
-    const store = LOCS.find((l) => l.id === locId) || LOCS[0];
-    const seat = store.seat || "Table";
     const nums = parseNumbers(countInput.value);
     grid.innerHTML = "";
+    grid.classList.toggle("duo", locId === ALL);
+    if (locId === ALL) {
+      // one card per room, a code for each outlet
+      for (const i of nums) {
+        const card = document.createElement("div");
+        card.className = "qr-card";
+        card.innerHTML = `
+          <div class="brandline">Al Manzil Hotel</div>
+          <div class="tname">Room</div>
+          <div class="tnum">${i}</div>
+          <div class="duo-codes">${LOCS.map((l, k) => `
+            <div><div class="qr-box" id="qr-${i}-${k}"></div><span class="olabel">${l.name}</span></div>`).join("")}
+          </div>
+          <div class="scan">📷 Scan to order to your room</div>`;
+        grid.appendChild(card);
+        LOCS.forEach((l, k) => new QRCode(card.querySelector(`#qr-${i}-${k}`), {
+          text: buildUrl(base, l.id, i), width: 200, height: 200,
+          colorDark: "#271a11", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M,
+        }));
+      }
+      hint.textContent = nums.length + " card" + (nums.length === 1 ? "" : "s") + " × " + LOCS.length + " codes · example: " + LOCS.map((l) => buildUrl(base, l.id, nums[0])).join("  ·  ");
+      return;
+    }
+    const store = LOCS.find((l) => l.id === locId) || LOCS[0];
+    const seat = store.seat || "Table";
     for (const i of nums) {
       const url = buildUrl(base, store.id, i);
       const card = document.createElement("div");

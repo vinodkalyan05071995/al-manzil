@@ -2,7 +2,7 @@
 
 Realtime QR ordering for Al Manzil Hotel Bahrain: two outlets, each with its own menu, kitchen
 screen, cashier and QR codes — In-Room Dining (`?loc=ird`, rooms) and Elixir Lounge
-(`?loc=elixir`, tables). Built from the Bunna app. Static front end + a zero-dependency Node server.
+(`?loc=elixir`, also delivered to rooms). Built from the Bunna app. Static front end + a zero-dependency Node server.
 Menus live in `data.js` (`MENUS.ird`, `MENUS.elixir`, allergen codes in `ALLERGENS`); per-outlet
 seat label, theme, logo and intro live in `locations.js`. Themes are sampled from the two PDF menus.
 
@@ -19,10 +19,10 @@ before claiming done, and keep every page on the shared design system below.**
 | `index.html` | **Menu / ordering** app (QR target, `?table=N`) | `styles.css`, `app.js`, `data.js` |
 | `kds.html` | **Kitchen display** (live board) | inline CSS, `kds.js` |
 | `cashier.html` | **Billing / cashier** | inline CSS (uses `styles.css` tokens), `cashier.js` |
-| `qr-codes.html` | Printable per-table QR codes | inline CSS (uses `styles.css` tokens) |
+| `qr-codes.html` | Printable QR codes — one card per room with both outlets' codes | inline CSS (uses `styles.css` tokens) |
 | `server.js` | Realtime API + static server. Orders persist to `orders.json`. | — |
 
-- QR codes encode `index.html?table=N`. The landing's CTAs link to `index.html`.
+- QR codes encode `index.html?loc=<outlet>&table=<room>`; both outlets' codes go in every room. The landing's CTAs link to `index.html`.
 - `index.html`, `cashier.html`, `qr-codes.html` all consume the CSS variables in **`styles.css`**,
   so changing those tokens reskins three pages at once. `index.html` uses `home.css`; `kds.html`
   has its own inline palette — keep both in sync with the tokens below.

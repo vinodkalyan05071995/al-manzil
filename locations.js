@@ -48,15 +48,15 @@
       name: "Elixir Lounge",
       address: "Al Manzil Hotel Bahrain",
       taxRate: 0,
-      seat: "Table",
+      seat: "Room",        // the Elixir QR code also sits in each room: drinks are delivered
       theme: "elixir",     // dark olive + wine, from the beverages menu
       art: "glass",
       logo: "logo-elixir.png",
       // drop the lounge's Instagram reel here (MP4, muted loop); the olive backdrop shows until then
       heroVideo: "media/elixir-hero.mp4",
       sections: {},
-      lede: "Signature cocktails, fine spirits and wines — order from your table and we'll bring it over.",
-      tags: ["🍸 Signature cocktails", "🥃 By the glass or bottle", "🍷 Wine & champagne"],
+      lede: "Signature cocktails, fine spirits and wines from Elixir Lounge — order from your room and we'll bring it up.",
+      tags: ["🛎️ Delivered to your room", "🍸 Signature cocktails", "🍷 Wine & champagne"],
       instagram: "https://www.instagram.com/elixir_bahrain/",
       menu: {},
     },

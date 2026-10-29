@@ -1,104 +1,143 @@
-# Al Manzil Hotel — QR Ordering (In-Room Dining + Elixir Lounge)
+# Al Manzil Hotel — QR Ordering
 
-A realtime hotel ordering system with **QR-code table ordering**,
-a **live kitchen display**, and a **billing/cashier station** — all running in real time.
+QR ordering for **Al Manzil Hotel Bahrain**, with two outlets that each run on their own:
 
-The app is **multi-location ready**: one central server serves every store, and **each store
-has its own kitchen screen, its own counter/cashier screen, its own order numbers, tax rate,
-menu, and QR codes**. It currently ships configured for a **single store** — adding more is one
-entry in `locations.js`, no other code changes.
+| Outlet | Store id | Guests order from | Menu |
+|--------|----------|-------------------|------|
+| **In-Room Dining** | `ird` | their **room** (QR code in each room) | 102 dishes in 17 sections, allergen icons + legend |
+| **Elixir Lounge** | `elixir` | their **room** (QR code in each room) — drinks delivered | 131 drinks in 13 sections |
 
-A guest scans the QR on their table → sees that store's menu → taps **Add** → chooses **Pay now**
-or **Pay at counter** → **Place Order**. The order appears instantly on that store's kitchen and
-cashier screens, and the guest sees their status update live (Received → Preparing → Ready).
+Each outlet has its own menu, kitchen/bar screen, cashier screen, QR codes, order numbers and
+staff login. One server and one database serve both.
 
-## Files
-| File | Purpose |
-|------|---------|
-| `server.js` | Central realtime server (Node, zero external deps). Serves the site + location-scoped order API + live SSE feed. Prices/tax are authoritative on the server, per location. |
-| `locations.js` | **The store registry** — one block per location (id, name, address, tax rate, menu overrides). Add a store here. Shared by server and browser. |
-| `db.js` | SQLite store (`node:sqlite`, built-in). Per-location order numbering. Migrates legacy `orders.json` on first run. |
-| `data.js` | The **base** menu (items/prices). Per-store tweaks live in `locations.js`. |
-| `index.html` + `app.js` + `styles.css` | **Menu / ordering app — the front door (site root).** Reads `?loc=<store>&table=N` from the QR. |
-| `home.html` + `home.css` + `home.js` | **Landing page** — marketing story page (secondary). |
-| `kds.html` + `kds.js` | **Kitchen display** — locked to one store via `?loc=`, live New → Preparing → Ready board. |
-| `cashier.html` + `cashier.js` | **Billing / cashier** — locked to one store, itemized bills, mark paid, printable receipts. |
-| `loc-staff.js` | Shared guard for the staff screens — resolves `?loc`, shows a store picker (auto-skipped when there's only one store). |
-| `qr-codes.html` | Staff page — generates a printable QR per table, per location. |
+A guest scans the QR code → sees that outlet's menu, already set to their room → adds
+items → places the order. It appears instantly on that outlet's kitchen or bar screen and its
+cashier screen, and the guest's phone updates live: Received → Preparing → Ready.
 
-## Run it
+## Run it locally
+
 ```bash
 cd al-manzil
-node server.js          # needs Node 22.5+ (uses the built-in node:sqlite)
+node server.js          # Node 24 (uses the built-in node:sqlite) — no npm install needed
 ```
-Then open (the sample store id is `downtown`):
-- **Landing page:** http://localhost:8100/
-- **Customer menu (table 7):** http://localhost:8100/index.html?loc=downtown&table=7
-- **Counter / order-ahead:** http://localhost:8100/index.html?loc=downtown
-- **Kitchen display:** http://localhost:8100/kds.html?loc=downtown
-- **Billing / cashier:** http://localhost:8100/cashier.html?loc=downtown
-- **Print QR codes:** http://localhost:8100/qr-codes.html
 
-Open the menu and the kitchen/cashier screens side by side to watch orders flow live.
-QR codes encode `index.html?loc=<store>&table=N`, so a scan opens the menu locked to that
-store **and** that table.
+Open http://localhost:8100 (set `PORT=` to use another port).
 
-## Adding another location
-Add one block to the `LOCATIONS` array in `locations.js`:
-```js
-{
-  id: "lakeside",                       // appears in URLs as ?loc=lakeside
-  name: "Bunna Lakeside",
-  address: "8 Harbor Walk · Lake District",
-  taxRate: 0.07,                        // this store's tax
-  menu: {
-    unavailable: ["breakfast-sammie"],  // items this store doesn't carry
-    price: { "campfire-mocha": 6.5 },   // this store's price overrides
-  },
-}
-```
-That store immediately gets its own kitchen screen (`kds.html?loc=lakeside`), counter screen
-(`cashier.html?loc=lakeside`), order-number sequence, tax, menu, and QR codes. When more than
-one store exists, the staff screens show a one-time **store picker** (then bookmark the page).
+| Page | URL |
+|------|-----|
+| Landing — choose an outlet | `/` |
+| In-Room Dining menu, room 204 | `/index.html?loc=ird&table=204` |
+| Elixir Lounge menu, room 204 | `/index.html?loc=elixir&table=204` |
+| Kitchen screen (in-room) | `/kds.html?loc=ird` |
+| Bar screen (Elixir) | `/kds.html?loc=elixir` |
+| Cashier | `/cashier.html?loc=ird` or `?loc=elixir` |
+| Products dashboard (edit menus) | `/admin.html` |
+| Printable QR codes | `/qr-codes.html` |
+
+Open a menu next to its kitchen and cashier screens to watch an order move in real time.
+
+### Logins
+
+| Who | Username | Password |
+|-----|----------|----------|
+| Master admin (both outlets, add outlets) | `MASTER_USER` env (default `admin`) | `MASTER_PASS` env (default `admin`) |
+| In-Room Dining staff | `ird` | `ird123` (default — change after first login) |
+| Elixir Lounge staff | `elixir` | `elixir123` (default — change after first login) |
+
+Store logins can only edit their own outlet's menu.
+
+## QR codes
+
+Both outlets' QR codes are placed in the rooms. `qr-codes.html` prints:
+
+- **Both outlets — one card per room** (default): each card shows the room number with two codes,
+  In-Room Dining (food) and Elixir Lounge (drinks).
+- **One outlet** at a time, if you prefer separate cards.
+- Room numbers accept ranges and lists: `101-120, 201-220, 305` (up to 300 rooms per sheet).
+- Each code encodes `index.html?loc=<outlet>&table=<room>`.
+- **Print from the live site**, not localhost: the codes use the address the page was opened
+  from (editable in *Public menu URL*).
+
+## Files
+
+| File | Purpose |
+|------|---------|
+| `server.js` | Realtime server (Node, no dependencies): site, order API, live SSE feed, logins. Prices are always taken from the menu on the server, never from the guest's phone. |
+| `db.js` | SQLite database (`almanzil.db`, or `DB_FILE`). Stores, menus, orders, loyalty points — every row tagged with its outlet. |
+| `data.js` | Starting menus: `MENUS.ird` and `MENUS.elixir`, plus the `ALLERGENS` legend. Seeded into the database on first boot; edit menus in the dashboard after that. |
+| `locations.js` | The two outlets and how each one looks: seat label ("Room"), theme, logo, hero photo/video, section photos, intro text, Instagram link. |
+| `index.html` + `app.js` + `menu.css` + `layout.css` | Guest menu: hero, section banners, printed-menu rows, allergen icons, order bar, cart, live order tracker. |
+| `home.html` | Landing page: split screen for the two outlets and a dish slider (Swiper). |
+| `kds.html` + `kds.js` | Kitchen / bar screen for one outlet: New → Preparing → Ready → Delivered. |
+| `cashier.html` + `cashier.js` | Cashier for one outlet: open bills, mark paid (cash/card), printable receipts. |
+| `admin.html` + `admin.js` | Products dashboard: edit items, prices, sections and photos per outlet. |
+| `qr-codes.html` | Printable QR cards: one card per room with both outlets' codes, or one outlet at a time. |
+| `loc-staff.js` | Locks a staff screen to one outlet via `?loc=` and shows an outlet picker if it's missing. |
+| `styles.css` | Shared staff-screen styles (cream and bronze). |
+| `media/` | Photos from the in-room dining menu. Add `elixir-hero.mp4` here for the Elixir video. |
+| `logo-manzil.png`, `logo-elixir.png`, `logo.png` | Logos cut from the hotel's PDF menus. |
+| `render.yaml` | Render blueprint (web service + persistent disk). |
+
+## Menus and allergens
+
+Menus come from the hotel's two PDFs. Prices are in BHD and already include the 10% service
+charge, 5% government levy and 10% VAT, so the outlets' tax rate is 0.
+
+In-room dishes carry allergen codes in `tags`, shown as icons and explained in the legend at the
+bottom of the menu:
+
+| Code | Allergen | Code | Allergen |
+|------|----------|------|----------|
+| `v` | Vegetarian | `s` | Shellfish |
+| `g` | Gluten | `n` | Nuts |
+| `d` | Dairy | `h` | Spicy |
+| `e` | Eggs | | |
+
+Spirits and wine are listed twice where the PDF has two prices: once for the 30 ml pour or glass,
+once for the bottle.
+
+## Photos and video
+
+- **Section banners:** set in `locations.js` → `sections` (category id → image path).
+- **Hero:** `hero` (image) or `heroVideo` (MP4, played muted and looped). A missing video falls
+  back to the outlet's colour backdrop.
+- **Elixir Lounge** is set up for `media/elixir-hero.mp4`; add the lounge's reel there.
+- **Single items:** upload a photo per item in the products dashboard.
 
 ## How it works
-- **Per-store isolation:** every order carries a `location`. The kitchen and cashier screens
-  subscribe to a location-scoped SSE feed (`/api/stream?loc=…`) and only ever see their own
-  store's orders. Order numbers count per store (Downtown #101, Lakeside #101…).
-- **Server-authoritative pricing:** the client's prices are ignored. The server rebuilds each
-  order from the store's resolved menu and computes the total with that store's tax rate.
-- **Who placed it:** table orders are identified by **table number**; counter orders ask for a
-  **name**. Both get a big **order number** the guest can quote.
-- **Payment:** *Pay now* runs a mock card form (no real charge) and marks the order **Paid**;
-  *Pay at counter/table* leaves it **unpaid** for the cashier to settle.
-- **Persistence:** orders are stored in SQLite (`orders.db`, survives restart/redeploy). A legacy
-  `orders.json`, if present on first boot, is imported into the default store automatically.
 
-### API (for reference / future mobile app)
+- **Separate outlets:** every order and menu item carries its outlet. Kitchen and cashier screens
+  subscribe to `/api/stream?loc=…` and only see their own outlet. Order numbers count per outlet.
+- **Live updates:** placing an order, advancing it, or marking it paid posts to the server, which
+  pushes the change to every open screen over SSE.
+- **Payment:** *Charge to room* / *Pay at counter* leave the order unpaid for the cashier. *Pay now*
+  is a mock card form — no real charge. A real gateway should mark orders paid only after its
+  webhook confirms.
+- **Loyalty:** a guest can add a phone number to earn 1 point per 1 BHD, credited when paid.
+
+### API
+
 ```
-GET  /api/locations                  store registry
-GET  /api/menu?loc=ID                resolved menu + tax for a store
-GET  /api/stream?loc=ID              SSE live feed (that store only)
-GET  /api/orders?loc=ID[&active=1]   list orders for a store
-POST /api/orders                     place order  { loc, name, table, type, items[], paymentMethod, paymentStatus }
-POST /api/orders/:id/status          advance      { status: new|preparing|ready|completed }
-POST /api/orders/:id/payment         settle       { status: paid|unpaid, method: cash|card|online }
+GET  /api/locations                       outlets
+GET  /api/menu?loc=ID                     an outlet's menu
+GET  /api/stream?loc=ID                   live feed for one outlet (SSE)
+GET  /api/orders?loc=ID[&active=1]        an outlet's orders
+POST /api/orders                          place  { loc, table, type, items[], name?, phone? }
+POST /api/orders/:id/status               advance { status: new|preparing|ready|completed }
+POST /api/orders/:id/payment              settle  { status: paid|unpaid, method: cash|card|online }
+POST /api/login · /api/logout · GET /api/me                  staff session
+GET  /api/catalog · POST /api/products · /api/collections     menu editing (logged in)
 ```
 
-## Hosting (recommended: one central server)
-Run a **single instance in the cloud** that serves every store; each store opens its own
-`?loc=` URLs. One deploy updates everyone, and you get central reporting.
-- **Easiest:** push the repo to **Render** or **Railway** — they run `node server.js`, give you
-  HTTPS, and need no config. (Ensure the Node version is **22.5+** so `node:sqlite` is available.)
-- **Also fine:** Fly.io, or a small VPS (DigitalOcean/Hetzner).
-- Point the QR page's **Public menu URL** at your domain, pick the location, and print.
-- **Trade-off:** central hosting means each store needs working internet; if a store's wifi
-  drops, its kitchen screen pauses until it's back. True offline resilience would require a
-  per-store server with sync — more complexity than this setup needs.
+## Deploy to Render
 
-## Going further later
-- **Real card payments:** replace the mock `payForm` in `app.js` with Stripe/Razorpay Checkout,
-  and only mark the order paid after the gateway webhook confirms.
-- **Per-store staff login:** add lightweight auth so a screen is bound to its store automatically
-  instead of via `?loc=`.
-- **Postgres:** swap SQLite for Postgres if you later want heavy cross-store reporting.
+`render.yaml` creates a web service called **al-manzil** (Starter plan, Frankfurt — the
+closest Render region to Bahrain) with a 1 GB disk at `/data` for the database and uploaded
+photos.
+
+1. Give Render's GitHub app access to this repo.
+2. In Render: **New → Blueprint** → pick this repo.
+3. Enter a password for **MASTER_PASS** (the master username is `manziladmin`), then **Apply**.
+4. Open the service URL, then print QR codes from `https://<service-url>/qr-codes.html`.
+
+This project has its own database and Render service, separate from the other client sites.
