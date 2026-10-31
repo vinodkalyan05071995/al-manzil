@@ -114,7 +114,7 @@
 
   function load(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }
   function save() { localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
-  const fmt = (n) => "din " + (Number(n) || 0).toFixed(3);
+  const fmt = (n) => "BHD " + (Number(n) || 0).toFixed(3);
   const itemById = (id) => MENU.find((m) => m.id === id);
 
   /* ---------- table chip / context ---------- */

@@ -18,7 +18,7 @@
   const cols = { unpaid: document.getElementById("col-unpaid"), paid: document.getElementById("col-paid") };
   const orders = new Map();
 
-  const fmt = (n) => "din " + (n || 0).toFixed(3);
+  const fmt = (n) => "BHD " + (n || 0).toFixed(3);
   const esc = (s) => String(s).replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
   const subtotalOf = (o) => o.items.reduce((s, i) => s + i.price * i.qty, 0);
   const billOf = (o) => { const sub = subtotalOf(o); const tax = sub * TAX_RATE; return { sub, tax, total: sub + tax }; };
